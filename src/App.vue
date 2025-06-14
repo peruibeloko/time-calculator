@@ -1,17 +1,11 @@
 <template>
-  <ControlsModal :isOpen="isModalOpen" @closeModal="isModalOpen = false" />
   <div class="container">
     <header class="centered">
-      <h1 class="site-title">
-        Time Calculator <span class="info" @click="isModalOpen = true">ⓘ</span>
-      </h1>
+      <h1 class="site-title">Time Calculator</h1>
     </header>
-    <main>
-      <EntryList @onEvaluate="updateResult" />
-      <div class="hbar"></div>
-      <section>
-        <h1 class="result.value" v-if="result">Thats {{ result }}</h1>
-      </section>
+    <main class="main">
+      <InputArea @parse="handleParse" />
+      <h2 class="result">{{ result }}</h2>
     </main>
     <footer class="footer">
       <div class="line">
@@ -26,8 +20,9 @@
       <div class="line">
         <small
           >Powered by the highly experimental, bleeding-edge,
-          <a href="https://tc39.es/proposal-temporal/docs/" class="source-link">Temporal Object</a
-          >&nbsp;proposal by TC39
+          <a href="https://tc39.es/proposal-temporal/docs/" class="source-link"
+            >Temporal Object proposal</a
+          >
         </small>
       </div>
     </footer>
@@ -35,21 +30,14 @@
 </template>
 
 <script lang="ts" setup>
-import EntryList from './components/EntryList.vue';
-import ControlsModal from './components/ControlsModal.vue';
+import InputArea from './InputArea.vue';
+import { parseInput, ParseResult } from './parser';
 import { ref } from 'vue';
 
-interface InputObject {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
-
-const isModalOpen = ref(false);
 const result = ref('');
 
-const updateResult = (totals: InputObject) => {
+const handleParse = (input: string) => updateResult(parseInput(input));
+const updateResult = (totals: ParseResult) => {
   let count = Object.values(totals).filter(el => el > 0).length;
 
   result.value = '';
@@ -82,14 +70,7 @@ const updateResult = (totals: InputObject) => {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=KoHo&display=swap');
-
-:root {
-  --dark: hsl(0, 0%, 10%);
-  --light: hsl(41, 100%, 89%);
-  --darker-light: hsl(41, 100%, 69%);
-  --darken-overlay: rgba(0, 0, 0, 0.4);
-}
+@import url('https://carlinhos.dev.br/shared/styles/theme.css');
 
 * {
   margin: 0;
@@ -99,12 +80,13 @@ const updateResult = (totals: InputObject) => {
 
 h1 {
   text-align: center;
+  font-family: var(--font__heading);
 }
 
 #app {
-  background-color: var(--dark);
-  color: var(--light);
-  font-family: 'KoHo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--color__background);
+  color: var(--color__text);
+  font-family: var(--font__body);
 }
 
 .container {
@@ -115,12 +97,34 @@ h1 {
 }
 
 .site-title {
-  padding: 5rem 0;
+  padding: 3rem 0;
   font-size: 3rem;
 }
 
-.result.value {
+main.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+main.main textarea {
+  width: 60%;
+  height: 100%;
+  margin: 0;
+  resize: none;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 1rem;
   padding: 2rem 0;
+  width: 60%;
+  background-color: var(--bg);
+  border: 2px solid var(--color__primary);
+  border-radius: 1rem;
 }
 
 .hbar {

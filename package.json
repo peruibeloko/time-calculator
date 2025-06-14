@@ -1,19 +1,19 @@
 {
   "name": "time-calculator",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "serve": "vite preview"
   },
   "dependencies": {
-    "@js-temporal/polyfill": "^0.4.4",
-    "vue": "^3.4.31"
+    "@js-temporal/polyfill": "^0.5.1",
+    "vue": "^3.5.16"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.5",
-    "typescript": "^5.5.2",
-    "vite": "^5.3.2",
-    "vue-tsc": "^2.0.22"
+    "@vitejs/plugin-vue": "^5.2.4",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.10"
   }
 }
