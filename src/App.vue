@@ -9,18 +9,18 @@
     </main>
     <footer class="footer">
       <div class="line">
-        <a href="https://github.com/peruibeloko/time-calculator" class="source-link"
+        <a href="https://github.com/peruibeloko/time-calculator" target="_blank" class="source-link"
           >Check the source here!</a
         >
         <span class="separator">·</span>
-        <a href="https://github.com/peruibeloko" class="source-link"
+        <a href="https://github.com/peruibeloko" target="_blank" class="source-link"
           >Check my other projects here!</a
         >
       </div>
       <div class="line">
         <small
           >Powered by the highly experimental, bleeding-edge,
-          <a href="https://tc39.es/proposal-temporal/docs/" class="source-link"
+          <a href="https://tc39.es/proposal-temporal/docs/" target="_blank" class="source-link"
             >Temporal Object proposal</a
           >
         </small>
@@ -30,42 +30,28 @@
 </template>
 
 <script lang="ts" setup>
-import InputArea from './InputArea.vue';
-import { parseInput, ParseResult } from './parser';
 import { ref } from 'vue';
+
+import InputArea from './InputArea.vue';
+
+import { Lexer } from './parser/lexer';
+import { Parser } from './parser/parser';
+import { evaluate } from './parser/evaluator';
 
 const result = ref('');
 
-const handleParse = (input: string) => updateResult(parseInput(input));
-const updateResult = (totals: ParseResult) => {
-  let count = Object.values(totals).filter(el => el > 0).length;
+const handleParse = (input: string) => {
+  const tokens = new Lexer(input).tokenize();
+  const rpnTokens = new Parser(tokens).shuntingYard();
+  const duration = evaluate(rpnTokens).round('seconds');
 
-  result.value = '';
-  if (totals.days) {
-    count--;
-    result.value += totals.days + ' days';
-    if (count == 1) result.value += ' and';
-    else if (count > 1) result.value += ',';
-  }
+  let str = '';
+  str += duration.days ? `${duration.days}d ` : '';
+  str += duration.hours ? `${duration.hours}h ` : '';
+  str += duration.minutes ? `${duration.minutes}min ` : '';
+  str += duration.seconds ? `${duration.seconds}s` : '';
 
-  if (totals.hours) {
-    count--;
-    result.value += ' ' + totals.hours + ' hours';
-    if (count == 1) result.value += ' and';
-    else if (count > 1) result.value += ',';
-  }
-
-  if (totals.minutes) {
-    count--;
-    result.value += ' ' + totals.minutes + ' minutes';
-    if (count == 1) result.value += ' and';
-    else if (count > 1) result.value += ',';
-  }
-
-  if (totals.seconds) {
-    count--;
-    result.value += ' ' + totals.seconds + ' seconds';
-  }
+  result.value = str;
 };
 </script>
 
@@ -127,15 +113,6 @@ main.main textarea {
   border-radius: 1rem;
 }
 
-.hbar {
-  background-color: var(--darken-overlay);
-  width: 80%;
-  max-width: 45rem;
-  height: 0.5rem;
-  border-radius: 0.5rem;
-  margin: 0 auto;
-}
-
 .footer {
   padding: 1rem 0;
   display: flex;
@@ -152,11 +129,7 @@ main.main textarea {
 }
 
 .source-link {
-  color: var(--light);
-}
-
-.source-link:visited {
-  color: var(--darker-light);
+  color: var(--color__accent);
 }
 
 .separator {
@@ -164,9 +137,7 @@ main.main textarea {
   font-size: 2rem;
 }
 
-.info {
-  font-size: medium;
-  vertical-align: super;
-  cursor: pointer;
+.source-link:visited {
+  color: color-mix(in srgb, var(--color__accent) 100%, black 50%);
 }
 </style>
