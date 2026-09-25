@@ -56,7 +56,7 @@ const handleParse = (input: string) => {
 </script>
 
 <style>
-@import url('https://carlinhos.dev.br/shared/styles/theme.css');
+@import url('https://carlinhos.dev/shared/styles/theme.css');
 
 * {
   margin: 0;
