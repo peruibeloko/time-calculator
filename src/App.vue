@@ -30,33 +30,33 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref } from "vue";
 
-import InputArea from './InputArea.vue';
+import InputArea from "./InputArea.vue";
 
-import { Lexer } from './parser/lexer';
-import { Parser } from './parser/parser';
-import { evaluate } from './parser/evaluator';
+import { Lexer } from "./parser/lexer";
+import { Parser } from "./parser/parser";
+import { evaluate } from "./parser/evaluator";
 
-const result = ref('');
+const result = ref("");
 
 const handleParse = (input: string) => {
   const tokens = new Lexer(input).tokenize();
   const rpnTokens = new Parser(tokens).shuntingYard();
-  const duration = evaluate(rpnTokens).round('seconds');
+  const duration = evaluate(rpnTokens).round("seconds");
 
-  let str = '';
-  str += duration.days ? `${duration.days}d ` : '';
-  str += duration.hours ? `${duration.hours}h ` : '';
-  str += duration.minutes ? `${duration.minutes}min ` : '';
-  str += duration.seconds ? `${duration.seconds}s` : '';
+  let str = "";
+  str += duration.days ? `${duration.days}d ` : "";
+  str += duration.hours ? `${duration.hours}h ` : "";
+  str += duration.minutes ? `${duration.minutes}min ` : "";
+  str += duration.seconds ? `${duration.seconds}s` : "";
 
   result.value = str;
 };
 </script>
 
 <style>
-@import url('https://carlinhos.dev/shared/styles/theme.css');
+@import url("https://carlinhos.dev/shared/styles/theme.css");
 
 * {
   margin: 0;

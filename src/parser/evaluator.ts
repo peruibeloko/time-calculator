@@ -1,6 +1,5 @@
-import { Temporal } from '@js-temporal/polyfill';
-import { Token, TokenType } from './Token';
-import type { Tokens } from './Token';
+import { Token, TokenType } from "./Token";
+import type { Tokens } from "./Token";
 
 export function evaluate(rpnTokens: Token[]) {
   const stack: Token[] = [];
@@ -12,9 +11,9 @@ export function evaluate(rpnTokens: Token[]) {
   const durationToken = (d: Temporal.Duration) =>
     ({
       type: TokenType.DURATION,
-      lexeme: '',
-      value: d
-    } as Tokens.DURATION);
+      lexeme: "",
+      value: d,
+    }) as Tokens.DURATION;
 
   const getDuration = () => {
     const a = peek();
@@ -57,13 +56,13 @@ export function evaluate(rpnTokens: Token[]) {
 
     if (isDuration(a) && isNumber(b)) {
       let result = Temporal.Duration.from({
-        seconds: a.value.total('seconds') * b.value
+        seconds: a.value.total("seconds") * b.value,
       });
 
       stack.push(durationToken(result));
     } else if (isNumber(a) && isDuration(b)) {
       let result = Temporal.Duration.from({
-        seconds: b.value.total('seconds') * a.value
+        seconds: b.value.total("seconds") * a.value,
       });
 
       stack.push(durationToken(result));
@@ -77,7 +76,7 @@ export function evaluate(rpnTokens: Token[]) {
     if (!a || !b) throw new Error();
 
     let result = Temporal.Duration.from({
-      seconds: a.value.total('seconds') / b.value
+      seconds: a.value.total("seconds") / b.value,
     });
 
     stack.push(durationToken(result));
@@ -94,7 +93,7 @@ export function evaluate(rpnTokens: Token[]) {
       [TokenType.STAR]: mult,
       [TokenType.SLASH]: div,
       [TokenType.LEFT_PAREN]: () => {},
-      [TokenType.RIGHT_PAREN]: () => {}
+      [TokenType.RIGHT_PAREN]: () => {},
     };
 
     fns[tk.type]();

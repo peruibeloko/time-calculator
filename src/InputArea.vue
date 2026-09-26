@@ -12,9 +12,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref } from "vue";
 
-const text = ref('');
+const text = ref("");
 const emit = defineEmits<{
   parse: [input: string];
 }>();

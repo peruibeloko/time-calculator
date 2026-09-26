@@ -1,4 +1,4 @@
-import { Token, TokenPatterns } from './Token';
+import { Token, TokenPatterns } from "./Token";
 
 export class Lexer {
   #src: string;
@@ -9,7 +9,7 @@ export class Lexer {
 
   #isAtEnd = () => this.#src.length === 0;
   #advance = (n: number) => (this.#src = this.#src.slice(n));
-  #consumeWhitespace = () => (this.#src = this.#src.replace(/^\s+/, ''));
+  #consumeWhitespace = () => (this.#src = this.#src.replace(/^\s+/, ""));
 
   tokenize() {
     const out: Token[] = [];

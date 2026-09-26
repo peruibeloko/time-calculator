@@ -1,14 +1,12 @@
-import { Temporal } from '@js-temporal/polyfill';
-
 export enum TokenType {
-  LEFT_PAREN = 'LEFT_PAREN',
-  RIGHT_PAREN = 'RIGHT_PAREN',
-  PLUS = 'PLUS',
-  MINUS = 'MINUS',
-  STAR = 'STAR',
-  SLASH = 'SLASH',
-  DURATION = 'DURATION',
-  NUMBER = 'NUMBER'
+  LEFT_PAREN = "LEFT_PAREN",
+  RIGHT_PAREN = "RIGHT_PAREN",
+  PLUS = "PLUS",
+  MINUS = "MINUS",
+  STAR = "STAR",
+  SLASH = "SLASH",
+  DURATION = "DURATION",
+  NUMBER = "NUMBER",
 }
 
 /*
@@ -22,7 +20,7 @@ export enum TokenType {
 export const TokenPatterns = new Map([
   [
     TokenType.DURATION,
-    /^(?:(?<days>\d+)d)?(?:(?<hours>\d+)h)?(?:(?<minutes>\d+)m(?:in)?)?(?:(?<seconds>\d+)s)?/i
+    /^(?:(?<days>\d+)d)?(?:(?<hours>\d+)h)?(?:(?<minutes>\d+)m(?:in)?)?(?:(?<seconds>\d+)s)?/i,
   ],
   // We capture negative numbers in the lexer
   [TokenType.NUMBER, /^-?\d+(?:\.\d+)?/],
@@ -31,7 +29,7 @@ export const TokenPatterns = new Map([
   [TokenType.PLUS, /^\+/],
   [TokenType.MINUS, /^-/],
   [TokenType.STAR, /^\*/],
-  [TokenType.SLASH, /^\//]
+  [TokenType.SLASH, /^\//],
 ]);
 
 export type Token =
@@ -66,17 +64,17 @@ export namespace Tokens {
 export function Token(type: TokenType, lexeme: string) {
   switch (type) {
     case TokenType.LEFT_PAREN:
-      return { type, lexeme: '(' } as Token;
+      return { type, lexeme: "(" } as Token;
     case TokenType.RIGHT_PAREN:
-      return { type, lexeme: ')' } as Token;
+      return { type, lexeme: ")" } as Token;
     case TokenType.PLUS:
-      return { type, lexeme: '+' } as Token;
+      return { type, lexeme: "+" } as Token;
     case TokenType.MINUS:
-      return { type, lexeme: '-' } as Token;
+      return { type, lexeme: "-" } as Token;
     case TokenType.STAR:
-      return { type, lexeme: '*' } as Token;
+      return { type, lexeme: "*" } as Token;
     case TokenType.SLASH:
-      return { type, lexeme: '/' } as Token;
+      return { type, lexeme: "/" } as Token;
     case TokenType.NUMBER:
       return { type, lexeme, value: Number(lexeme) } as Token;
     case TokenType.DURATION:
@@ -86,7 +84,7 @@ export function Token(type: TokenType, lexeme: string) {
         days: +days,
         hours: +hours,
         minutes: +minutes,
-        seconds: +seconds
+        seconds: +seconds,
       });
       return { type, lexeme, value: duration };
   }

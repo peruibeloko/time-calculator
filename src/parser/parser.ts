@@ -1,4 +1,4 @@
-import { Token, TokenType } from './Token';
+import { Token, TokenType } from "./Token";
 
 export class Parser {
   tokens: Token[];
