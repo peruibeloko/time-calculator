@@ -14,7 +14,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 
-const text = ref("");
+const text = ref("(50min * 2) + 30min - (4 * 50s) / 2");
 const emit = defineEmits<{
   parse: [input: string];
 }>();

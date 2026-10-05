@@ -25,7 +25,7 @@
       </div>
       <div class="line">
         <small
-          >Powered by the, now Stage 4,<a
+          >Powered by the, now Stage 4, <a
             href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal"
             target="_blank"
             class="source-link"
@@ -42,24 +42,26 @@ import { ref } from 'vue';
 
 import InputArea from './InputArea.vue';
 
-import { Lexer } from './parser/lexer';
-import { Parser } from './parser/parser';
-import { evaluate } from './parser/evaluator';
+import { Lexer } from './lexer.ts';
+import { Parser } from './parser.ts';
+import { evaluate } from './evaluator.ts';
 
 const result = ref('');
 
 const handleParse = (input: string) => {
-  const tokens = new Lexer(input).tokenize();
+  const tokens = new Lexer(input).scanTokens();  
   const rpnTokens = new Parser(tokens).shuntingYard();
-  const duration = evaluate(rpnTokens).round('seconds');
+  console.log(rpnTokens);
+  
+  // const duration = evaluate(rpnTokens).round('seconds');
 
-  let str = '';
-  str += duration.days ? `${duration.days}d ` : '';
-  str += duration.hours ? `${duration.hours}h ` : '';
-  str += duration.minutes ? `${duration.minutes}min ` : '';
-  str += duration.seconds ? `${duration.seconds}s` : '';
+  // let str = '';
+  // str += duration.days ? `${duration.days}d ` : '';
+  // str += duration.hours ? `${duration.hours}h ` : '';
+  // str += duration.minutes ? `${duration.minutes}min ` : '';
+  // str += duration.seconds ? `${duration.seconds}s` : '';
 
-  result.value = str;
+  // result.value = str;
 };
 </script>
 
