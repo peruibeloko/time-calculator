@@ -42,26 +42,17 @@ import { ref } from 'vue';
 
 import InputArea from './InputArea.vue';
 
-import { Lexer } from './lexer.ts';
-import { Parser } from './parser.ts';
-import { evaluate } from './evaluator.ts';
+import { Lexer } from './Lexer.ts';
+import { Parser } from './Parser.ts';
+import { evaluate } from './Evaluator.ts';
 
 const result = ref('');
 
 const handleParse = (input: string) => {
   const tokens = new Lexer(input).scanTokens();  
-  const rpnTokens = new Parser(tokens).shuntingYard();
-  console.log(rpnTokens);
+  const stack = new Parser(tokens).parse();  
+  const duration = evaluate(stack).round('seconds');
   
-  // const duration = evaluate(rpnTokens).round('seconds');
-
-  // let str = '';
-  // str += duration.days ? `${duration.days}d ` : '';
-  // str += duration.hours ? `${duration.hours}h ` : '';
-  // str += duration.minutes ? `${duration.minutes}min ` : '';
-  // str += duration.seconds ? `${duration.seconds}s` : '';
-
-  // result.value = str;
 };
 </script>
 
