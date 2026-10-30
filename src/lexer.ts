@@ -6,7 +6,6 @@ export class Lexer {
   #start: number;
   #current: number;
   #tokens: Token[];
-  #panicMode = false;
 
   constructor(input: string) {
     this.#src = input;
