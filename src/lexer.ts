@@ -6,16 +6,7 @@ export class Lexer {
   #start: number;
   #current: number;
   #tokens: Token[];
-  #panicInternal = false;
-
-  set #panicMode(value: boolean) {
-    console.log("prev lexeme", this.#src[this.#current - 1]);
-    this.#panicInternal = value;
-  }
-
-  get #panicMode() {
-    return this.#panicInternal;
-  }
+  #panicMode = false;
 
   constructor(input: string) {
     this.#src = input;
@@ -58,6 +49,16 @@ export class Lexer {
     this.#tokens.push(Token(type, value));
   }
 
+  #makeUnit(type: TokenType) {
+    const prev = this.#tokens.pop();
+    if (prev === undefined || prev.type !== TokenType.NUMBER) {
+      this.#panicMode = true;
+      return;
+    }
+
+    this.#makeToken(type, prev.value);
+  }
+
   scanTokens() {
     while (!this.#isAtEnd()) {
       this.#start = this.#current;
@@ -88,20 +89,20 @@ export class Lexer {
           this.#makeToken(TokenType.SLASH);
           break;
         case "d":
-          this.#makeToken(TokenType.DAYS);
+          this.#makeUnit(TokenType.DAYS);
           break;
         case "h":
-          this.#makeToken(TokenType.HOURS);
+          this.#makeUnit(TokenType.HOURS);
           break;
         case "m":
           if (this.#peek() === "i" && this.#peekNext() === "n") {
             this.#advance();
             this.#advance();
-            this.#makeToken(TokenType.MINUTES);
+            this.#makeUnit(TokenType.MINUTES);
           } else this.#panicMode = true;
           break;
         case "s":
-          this.#makeToken(TokenType.SECONDS);
+          this.#makeUnit(TokenType.SECONDS);
           break;
         case " ":
         case "\r":
