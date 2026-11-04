@@ -1,17 +1,15 @@
 (* @startebnf *)
-number = ? 0-9 ?, {number};
+number = ? 0-9 ?, {? 0-9 ?};
 
-second = number, "s";
+second = "s";
 
-minute = number, "min", [second];
+minute = "min", [number, second] | second;
 
-hour = number, "h", [minute];
+hour = "h", [number, minute] | minute;
 
-day = number, "d", [hour];
+day = "d", [number, hour] | hour;
 
-time = day | hour | minute | second;
-
-primary = number | time | "(", expression, ")";
+primary = number, [day] | "(", expression, ")";
 
 factor = primary, {("/" | "*"), primary};
 
