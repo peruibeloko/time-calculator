@@ -1,31 +1,46 @@
+import { Interpreter } from "./Interpreter";
 import { Token } from "./Token";
 import { TokenType } from "./TokenType";
 
 export class Lexer {
-  #src: string;
+  #source: string;
   #start: number;
   #current: number;
   #tokens: Token[];
 
   constructor(input: string) {
-    this.#src = input;
+    this.#source = input;
     this.#start = 0;
     this.#current = 0;
     this.#tokens = [];
   }
 
-  #isAtEnd = () => this.#current >= this.#src.length;
+  #isAtEnd = () => this.#current >= this.#source.length;
 
   #advance() {
-    return this.#src.charAt(this.#current++);
+    return this.#source.charAt(this.#current++);
   }
 
-  #peek() {
-    return this.#src.charAt(this.#current);
+  #match(expected: string) {
+    if (this.#isAtEnd()) return false;
+    if (this.#source.charAt(this.#current) !== expected) return false;
+
+    this.#current++;
+    return true;
   }
 
-  #peekNext() {
-    return this.#src.charAt(this.#current + 1);
+  #peek(n = 0) {
+    if (this.#isAtEnd()) return "\0";
+    return this.#source.charAt(this.#current + n);
+  }
+
+  #addSimpleToken(type: TokenType) {
+    this.#addToken(type, null);
+  }
+
+  #addToken(type: TokenType, literal: unknown) {
+    const text = this.#source.substring(this.#start, this.#current);
+    this.#tokens.push(new Token(type, text, literal, this.#start));
   }
 
   #isDigit(c: string) {
@@ -34,28 +49,9 @@ export class Lexer {
 
   #number() {
     while (this.#isDigit(this.#peek())) this.#advance();
-    return Token(
-      TokenType.NUMBER,
-      Number(this.#src.substring(this.#start, this.#current)),
-    );
-  }
 
-  #makeToken(type: TokenType, value?: unknown) {
-    if (this.#panicMode) {
-      this.#tokens.push(Token(TokenType.ERROR));
-      this.#panicMode = false;
-    }
-    this.#tokens.push(Token(type, value));
-  }
-
-  #makeUnit(type: TokenType) {
-    const prev = this.#tokens.pop();
-    if (prev === undefined || prev.type !== TokenType.NUMBER) {
-      this.#panicMode = true;
-      return;
-    }
-
-    this.#makeToken(type, prev.value);
+    const value = Number(this.#source.substring(this.#start, this.#current));
+    this.#addToken(TokenType.NUMBER, value);
   }
 
   scanTokens() {
@@ -63,45 +59,46 @@ export class Lexer {
       this.#start = this.#current;
       const lexeme = this.#advance();
 
-      if (this.#isDigit(lexeme)) {
-        this.#tokens.push(this.#number());
-        continue;
-      }
-
       switch (lexeme) {
         case "(":
-          this.#makeToken(TokenType.LEFT_PAREN);
+          this.#addSimpleToken(TokenType.LEFT_PAREN);
           break;
         case ")":
-          this.#makeToken(TokenType.RIGHT_PAREN);
+          this.#addSimpleToken(TokenType.RIGHT_PAREN);
           break;
         case "+":
-          this.#makeToken(TokenType.PLUS);
+          this.#addSimpleToken(TokenType.PLUS);
           break;
         case "-":
-          this.#makeToken(TokenType.MINUS);
+          this.#addSimpleToken(TokenType.MINUS);
           break;
         case "*":
-          this.#makeToken(TokenType.STAR);
+          this.#addSimpleToken(TokenType.STAR);
           break;
         case "/":
-          this.#makeToken(TokenType.SLASH);
+          this.#addSimpleToken(TokenType.SLASH);
           break;
         case "d":
-          this.#makeUnit(TokenType.DAYS);
+          this.#addSimpleToken(TokenType.DAY);
           break;
         case "h":
-          this.#makeUnit(TokenType.HOURS);
-          break;
-        case "m":
-          if (this.#peek() === "i" && this.#peekNext() === "n") {
-            this.#advance();
-            this.#advance();
-            this.#makeUnit(TokenType.MINUTES);
-          } else this.#panicMode = true;
+          this.#addSimpleToken(TokenType.HOUR);
           break;
         case "s":
-          this.#makeUnit(TokenType.SECONDS);
+          this.#addSimpleToken(TokenType.SECOND);
+          break;
+        case "m":
+          if (!this.#match("i")) { // Try for I
+            Interpreter.positionError(this.#start, "Unexpected character.");
+            break;
+          }
+
+          if (!this.#match("n")) { // Try for N
+            Interpreter.positionError(this.#start, "Unexpected character.");
+            break;
+          }
+
+          this.#addSimpleToken(TokenType.MINUTE);
           break;
         case " ":
         case "\r":
@@ -109,11 +106,16 @@ export class Lexer {
         case "\n":
           break;
         default:
-          this.#panicMode = true;
+          if (this.#isDigit(lexeme)) {
+            this.#number();
+          } else {
+            Interpreter.positionError(this.#start, "Unexpected character.");
+          }
+          break;
       }
     }
 
-    this.#makeToken(TokenType.EOF);
+    this.#addSimpleToken(TokenType.EOF);
     return this.#tokens;
   }
 }
