@@ -41,18 +41,13 @@
 import { ref } from 'vue';
 
 import InputArea from './InputArea.vue';
-
-import { Lexer } from './Lexer.ts';
-import { Parser } from './Parser.ts';
-import { evaluate } from './Evaluator.ts';
+import { Interpreter } from './Interpreter.ts';
 
 const result = ref('');
 
 const handleParse = (input: string) => {
-  const tokens = new Lexer(input).scanTokens();  
-  const stack = new Parser(tokens).parse();  
-  const duration = evaluate(stack).round('seconds');
-  
+  const interpreter = new Interpreter();
+  interpreter.run(input);  
 };
 </script>
 
