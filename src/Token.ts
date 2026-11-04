@@ -1,18 +1,36 @@
 import { TokenType } from "./TokenType";
 
-export type Token = { type: TokenType; value?: unknown };
-export const Token = (type: TokenType, value?: unknown) =>
-  Object.freeze({
-    type,
-    value,
-  });
+export class Token {
+  #type: TokenType;
+  #lexeme: string;
+  #literal: unknown;
+  #position: number;
 
-export type TimeToken = {
-  type:
-    | TokenType.DAYS
-    | TokenType.HOURS
-    | TokenType.MINUTES
-    | TokenType.SECONDS;
-  value: number;
-};
-export type DurationType = TimeToken["type"];
+  constructor(type: TokenType, lexeme: string, literal: unknown, position: number) {
+    this.#type = type;
+    this.#lexeme = lexeme;
+    this.#literal = literal;
+    this.#position = position;
+  }
+
+
+  get type() {
+    return this.#type;
+  }
+
+  get lexeme() {
+    return this.#lexeme;
+  }
+
+  get literal() {
+    return this.#literal;
+  }
+
+  get position() {
+    return this.#position;
+  }
+
+  toString() {
+    return `[${this.#type}:${this.#position}] ${this.#literal}`;
+  }
+}
