@@ -1,6 +1,13 @@
 import type { Token } from "./Token";
 import { type DurationType, TokenType } from "./TokenType";
 
+const isUnit = (x: Token) =>
+  ([
+    TokenType.DAY,
+    TokenType.HOUR,
+    TokenType.MINUTE,
+    TokenType.SECOND,
+  ] as TokenType[]).includes(x.type);
 const isDuration = (x: unknown) => x instanceof Temporal.Duration;
 const isNumber = (x: unknown) => typeof x === "number";
 
@@ -14,10 +21,12 @@ class Stack<T> {
   }
 
   push(x: T) {
+    console.log("push ", x);
     this.#state.push(x);
   }
 
   pop() {
+    console.log("pop ", this.top);
     return this.#state.pop() ?? null;
   }
 }
@@ -37,9 +46,14 @@ export class Evaluator {
     return this.#current >= this.#tokens.length;
   }
 
-  #getNext() {
+  #advance() {
     if (this.#isAtEnd()) return null;
     return this.#tokens[this.#current++];
+  }
+
+  #peek() {
+    if (this.#isAtEnd()) return null;
+    return this.#tokens[this.#current];
   }
 
   #makeDuration(unit: DurationType) {
@@ -87,7 +101,14 @@ export class Evaluator {
 
   #updateDuration(nextValue: number) {
     const currentDuration = this.#stack.pop();
-    const unit = this.#getNext();
+    const unit = this.#advance();
+
+    console.log(
+      "update duration (current, next, unit)",
+      currentDuration,
+      nextValue,
+      unit,
+    );
 
     if (!unit) {
       // ! error
@@ -98,7 +119,9 @@ export class Evaluator {
       switch (unit.type) {
         case TokenType.DAY:
           this.#stack.push(
-            Temporal.Duration.from({ ...currentDuration, days: nextValue })
+            currentDuration.add({
+              days: nextValue,
+            })
               .round({
                 largestUnit: "days",
                 smallestUnit: "seconds",
@@ -107,7 +130,7 @@ export class Evaluator {
           break;
         case TokenType.HOUR:
           this.#stack.push(
-            Temporal.Duration.from({ ...currentDuration, hours: nextValue })
+            currentDuration.add({ hours: nextValue })
               .round({
                 largestUnit: "days",
                 smallestUnit: "seconds",
@@ -116,7 +139,7 @@ export class Evaluator {
           break;
         case TokenType.MINUTE:
           this.#stack.push(
-            Temporal.Duration.from({ ...currentDuration, minutes: nextValue })
+            currentDuration.add({ minutes: nextValue })
               .round({
                 largestUnit: "days",
                 smallestUnit: "seconds",
@@ -125,7 +148,7 @@ export class Evaluator {
           break;
         case TokenType.SECOND:
           this.#stack.push(
-            Temporal.Duration.from({ ...currentDuration, seconds: nextValue })
+            currentDuration.add({ seconds: nextValue })
               .round({
                 largestUnit: "days",
                 smallestUnit: "seconds",
@@ -139,17 +162,26 @@ export class Evaluator {
     }
   }
 
-  #handleLiteral(token: Token) {
-    if (this.#stack.top instanceof Temporal.Duration) {
-      this.#updateDuration(token.literal as number);
+  #handleLiteral(current: number) {
+    if (isDuration(this.#stack.top)) {
+      const nextToken = this.#peek();
+      if (!nextToken) throw Error();
+
+      if (isUnit(nextToken)) {
+        this.#updateDuration(current);
+      } else {
+        this.#stack.push(current);
+      }
     } else {
-      this.#stack.push(token.literal as number);
+      this.#stack.push(current);
     }
   }
 
   #add() {
     const right = this.#stack.pop();
     const left = this.#stack.pop();
+
+    console.log("left, right", left, right);
 
     if (isDuration(left) && isDuration(right)) {
       this.#stack.push(
@@ -170,6 +202,8 @@ export class Evaluator {
     const right = this.#stack.pop();
     const left = this.#stack.pop();
 
+    console.log("left, right", left, right);
+
     if (isDuration(left) && isDuration(right)) {
       this.#stack.push(
         left.subtract(right).round({
@@ -189,49 +223,77 @@ export class Evaluator {
     const right = this.#stack.pop();
     const left = this.#stack.pop();
 
+    if (isNumber(left) && isNumber(right)) {
+      this.#stack.push(left * right);
+      return;
+    }
+
+    let duration: Temporal.Duration;
+    let scalar: number;
+
+    console.log("left, right", left, right);
+
     if (isDuration(left) && isNumber(right)) {
-      const seconds = left.total("seconds");
-      this.#stack.push(
-        Temporal.Duration.from({ seconds: seconds / right }).round({
-          largestUnit: "days",
-          smallestUnit: "seconds",
-        }),
-      );
-    } else if (isNumber(left) && isNumber(right)) {
-      this.#stack.push(left - right);
+      duration = left;
+      scalar = right;
+    } else if (isDuration(right) && isNumber(left)) {
+      duration = right;
+      scalar = left;
     } else {
       // ! error
       throw Error();
     }
+
+    const seconds = duration.total("seconds");
+    this.#stack.push(
+      Temporal.Duration.from({ seconds: seconds / scalar }).round({
+        largestUnit: "days",
+        smallestUnit: "seconds",
+      }),
+    );
   }
 
   #mul() {
     const right = this.#stack.pop();
     const left = this.#stack.pop();
 
+    if (isNumber(left) && isNumber(right)) {
+      this.#stack.push(left * right);
+      return;
+    }
+
+    let duration: Temporal.Duration;
+    let scalar: number;
+
+    console.log("left, right", left, right);
+
     if (isDuration(left) && isNumber(right)) {
-      const seconds = left.total("seconds");
-      this.#stack.push(
-        Temporal.Duration.from({ seconds: seconds * right }).round({
-          largestUnit: "days",
-          smallestUnit: "seconds",
-        }),
-      );
-    } else if (isNumber(left) && isNumber(right)) {
-      this.#stack.push(left - right);
+      duration = left;
+      scalar = right;
+    } else if (isDuration(right) && isNumber(left)) {
+      duration = right;
+      scalar = left;
     } else {
       // ! error
       throw Error();
     }
+
+    const seconds = duration.total("seconds");
+    this.#stack.push(
+      Temporal.Duration.from({ seconds: seconds * scalar }).round({
+        largestUnit: "days",
+        smallestUnit: "seconds",
+      }),
+    );
   }
 
   evaluate() {
     while (!this.#isAtEnd()) {
-      const token = this.#getNext()!;
+      const token = this.#advance()!;
 
       switch (token.type) {
         case TokenType.NUMBER:
-          this.#handleLiteral(token);
+          this.#handleLiteral(token.literal as number);
           break;
 
         case TokenType.DAY:
