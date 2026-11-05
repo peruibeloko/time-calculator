@@ -12,10 +12,10 @@ export class Parser {
     this.#tokens = tokens;
   }
 
-  #log(msg: unknown[], depth: number) {
-    depth++;
-    console.log("-".repeat(depth), ...msg);
-  }
+  // #log(msg: unknown[], depth: number) {
+  //   depth++;
+  //   console.log("-".repeat(depth), ...msg);
+  // }
 
   #error(token: Token, message: string) {
     Interpreter.tokenError(token, message);
@@ -62,27 +62,27 @@ export class Parser {
 
   #expression(depth: number) {
     depth++;
-    this.#log(["expression call"], depth);
+    // this.#log(["expression call"], depth);
     const val = this.#term(depth);
-    this.#log(["expression result", val], depth);
+    // this.#log(["expression result", val], depth);
     return val;
   }
 
   #term(depth: number) {
     depth++;
-    this.#log(["term call"], depth);
+    // this.#log(["term call"], depth);
     let expr;
-    
+
     let left = this.#factor(depth);
-    this.#log(["term left", left], depth);
-    
+    // this.#log(["term left", left], depth);
+
     expr = left;
-    
+
     while (this.#match(TokenType.MINUS, TokenType.PLUS)) {
       const op = this.#previous();
-      this.#log(["term op", op], depth);
+      // this.#log(["term op", op], depth);
       const right = this.#factor(depth);
-      this.#log(["term right", right], depth);
+      // this.#log(["term right", right], depth);
       expr = [...left, ...right, op];
     }
 
@@ -91,48 +91,48 @@ export class Parser {
 
   #factor(depth: number) {
     depth++;
-    this.#log(["factor call"], depth);
+    // this.#log(["factor call"], depth);
     let expr;
 
     let left = this.#primary(depth);
-    this.#log(["factor left", left], depth);
-    
+    // this.#log(["factor left", left], depth);
+
     expr = left;
-    
+
     while (this.#match(TokenType.SLASH, TokenType.STAR)) {
       const op = this.#previous();
-      this.#log(["factor op", op], depth);
+      // this.#log(["factor op", op], depth);
       const right = this.#primary(depth);
-      this.#log(["factor right", right], depth);
+      // this.#log(["factor right", right], depth);
       expr = [...left, ...right, op];
     }
-    
+
     return expr;
   }
-  
+
   #primary(depth: number): Token[] {
     depth++;
-    this.#log(["primary call"], depth);
+    // this.#log(["primary call"], depth);
     if (this.#match(TokenType.LEFT_PAREN)) {
       const expr = this.#expression(depth);
-      this.#log(["primary expr", expr], depth);
+      // this.#log(["primary expr", expr], depth);
       this.#consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
       return expr;
     }
-    
+
     const num = this.#number(depth);
-    this.#log(["primary num", num], depth);
-    return num
+    // this.#log(["primary num", num], depth);
+    return num;
   }
-  
+
   #number(depth: number) {
     depth++;
-    this.#log(["number call"], depth);
+    // this.#log(["number call"], depth);
     if (this.#match(TokenType.NUMBER)) {
       const num = this.#previous();
-      this.#log(["number value", num], depth);
+      // this.#log(["number value", num], depth);
       const day = this.#day(depth);
-      this.#log(["day value", day], depth);
+      // this.#log(["day value", day], depth);
       return [num, ...day];
     }
 
@@ -141,12 +141,12 @@ export class Parser {
 
   #day(depth: number) {
     depth++;
-    this.#log(["day call"], depth);
+    // this.#log(["day call"], depth);
     let expr: Token[] = [];
     if (this.#match(TokenType.DAY)) {
       expr.push(this.#previous());
-      this.#log(["day token", this.#previous()], depth);
-      
+      // this.#log(["day token", this.#previous()], depth);
+
       if (this.#match(TokenType.NUMBER)) {
         expr.push(this.#previous());
         expr.push(...this.#hour(depth));
@@ -154,20 +154,20 @@ export class Parser {
     } else {
       expr.push(...this.#hour(depth));
     }
-    
-    this.#log(["day result", expr], depth);
+
+    // this.#log(["day result", expr], depth);
     return expr;
   }
 
   #hour(depth: number) {
     depth++;
-    this.#log(["hour call"], depth);
-    
+    // this.#log(["hour call"], depth);
+
     let expr: Token[] = [];
     if (this.#match(TokenType.HOUR)) {
       expr.push(this.#previous());
-      this.#log(["hour token", this.#previous()], depth);
-      
+      // this.#log(["hour token", this.#previous()], depth);
+
       if (this.#match(TokenType.NUMBER)) {
         expr.push(this.#previous());
         expr.push(...this.#minute(depth));
@@ -176,18 +176,18 @@ export class Parser {
       expr.push(...this.#minute(depth));
     }
 
-    this.#log(["hour result", expr], depth);
+    // this.#log(["hour result", expr], depth);
     return expr;
   }
 
   #minute(depth: number) {
     depth++;
-    this.#log(["minute call"], depth);
+    // this.#log(["minute call"], depth);
     let expr: Token[] = [];
     if (this.#match(TokenType.MINUTE)) {
       expr.push(this.#previous());
-      this.#log(["minute token", this.#previous()], depth);
-      
+      // this.#log(["minute token", this.#previous()], depth);
+
       if (this.#match(TokenType.NUMBER)) {
         expr.push(this.#previous());
         expr.push(...this.#second(depth));
@@ -195,21 +195,21 @@ export class Parser {
     } else {
       expr.push(...this.#second(depth));
     }
-    
-    this.#log(["minute result", expr], depth);
+
+    // this.#log(["minute result", expr], depth);
     return expr;
   }
-  
+
   #second(depth: number) {
     depth++;
-    this.#log(["second call"], depth);
+    // this.#log(["second call"], depth);
     let expr: Token[] = [];
     if (this.#match(TokenType.SECOND)) {
       expr.push(this.#previous());
-      this.#log(["second token", this.#previous()], depth);
+      // this.#log(["second token", this.#previous()], depth);
     }
-    
-    this.#log(["second result", expr], depth);
+
+    // this.#log(["second result", expr], depth);
     return expr;
   }
 

@@ -21,12 +21,12 @@ class Stack<T> {
   }
 
   push(x: T) {
-    console.log("push ", x);
+    // console.log("push ", x);
     this.#state.push(x);
   }
 
   pop() {
-    console.log("pop ", this.top);
+    // console.log("pop ", this.top);
     return this.#state.pop() ?? null;
   }
 }
@@ -103,12 +103,12 @@ export class Evaluator {
     const currentDuration = this.#stack.pop();
     const unit = this.#advance();
 
-    console.log(
-      "update duration (current, next, unit)",
-      currentDuration,
-      nextValue,
-      unit,
-    );
+    // console.log(
+    //   "update duration (current, next, unit)",
+    //   currentDuration,
+    //   nextValue,
+    //   unit,
+    // );
 
     if (!unit) {
       // ! error
@@ -181,7 +181,7 @@ export class Evaluator {
     const right = this.#stack.pop();
     const left = this.#stack.pop();
 
-    console.log("left, right", left, right);
+    // console.log("left, right", left, right);
 
     if (isDuration(left) && isDuration(right)) {
       this.#stack.push(
@@ -202,7 +202,7 @@ export class Evaluator {
     const right = this.#stack.pop();
     const left = this.#stack.pop();
 
-    console.log("left, right", left, right);
+    // console.log("left, right", left, right);
 
     if (isDuration(left) && isDuration(right)) {
       this.#stack.push(
@@ -231,7 +231,7 @@ export class Evaluator {
     let duration: Temporal.Duration;
     let scalar: number;
 
-    console.log("left, right", left, right);
+    // console.log("left, right", left, right);
 
     if (isDuration(left) && isNumber(right)) {
       duration = left;
@@ -265,7 +265,7 @@ export class Evaluator {
     let duration: Temporal.Duration;
     let scalar: number;
 
-    console.log("left, right", left, right);
+    // console.log("left, right", left, right);
 
     if (isDuration(left) && isNumber(right)) {
       duration = left;
