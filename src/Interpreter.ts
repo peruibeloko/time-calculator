@@ -15,7 +15,7 @@ export class Interpreter {
     console.log(tokens);
 
     const parser = new Parser(tokens);
-    const rpn = parser.parse() ?? [];
+    const rpn = parser.parse() ?? []; // todo still wrong somewhere, eating some tokens
     console.log(rpn);
 
     const evaluator = new Evaluator(rpn);
