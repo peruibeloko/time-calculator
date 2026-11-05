@@ -13,9 +13,13 @@ export const TokenType = Object.freeze({
   SECOND: "SECOND",
 
   NUMBER: "NUMBER",
-
   EOF: "EOF",
-  ERROR: "ERROR",
 });
 
 export type TokenType = typeof TokenType[keyof typeof TokenType];
+
+export type DurationType =
+  | typeof TokenType.DAY
+  | typeof TokenType.HOUR
+  | typeof TokenType.MINUTE
+  | typeof TokenType.SECOND;

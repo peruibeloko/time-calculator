@@ -1,3 +1,4 @@
+import { Evaluator } from "./Evaluator";
 import { Lexer } from "./Lexer";
 import { Parser } from "./Parser";
 import type { Token } from "./Token";
@@ -8,13 +9,18 @@ export class Interpreter {
 
   run(input: string) {
     Interpreter.#hadError = false;
+    
     const lexer = new Lexer(input);
     const tokens = lexer.scanTokens();
     console.log(tokens);
 
     const parser = new Parser(tokens);
-    const rpn = parser.parse();
+    const rpn = parser.parse() ?? [];
     console.log(rpn);
+
+    const evaluator = new Evaluator(rpn);
+    const result = evaluator.evaluate();
+    console.log(result);
   }
 
   static positionError(where: number, message: string) {
