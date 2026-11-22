@@ -25,7 +25,8 @@
       </div>
       <div class="line">
         <small
-          >Powered by the, now Stage 4, <a
+          >Powered by the, now Stage 4,
+          <a
             href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal"
             target="_blank"
             class="source-link"
@@ -36,23 +37,29 @@
     </footer>
   </div>
 </template>
-
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref } from "vue";
 
-import InputArea from './InputArea.vue';
-import { Interpreter } from './Interpreter.ts';
+import InputArea from "./InputArea.vue";
+import { Interpreter } from "./Interpreter.ts";
 
-const result = ref('');
+const result = ref("");
 
 const handleParse = (input: string) => {
-  const interpreter = new Interpreter();
-  interpreter.run(input);  
+  const evalResult = new Interpreter().run(input);
+
+  if (typeof evalResult === "number") {
+    result.value = "" + evalResult;
+  } else if (!evalResult) {
+    result.value = "Something went wrong, check the console for errors!";
+  } else {
+    const enFormat = new Intl.DurationFormat("en", { style: "long" });
+    result.value = enFormat.format(evalResult);
+  }
 };
 </script>
-
 <style>
-@import url('https://carlinhos.dev/shared/styles/theme.css');
+@import url("https://carlinhos.dev/shared/styles/theme.css");
 
 * {
   margin: 0;

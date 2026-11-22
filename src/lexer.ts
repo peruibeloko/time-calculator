@@ -21,12 +21,18 @@ export class Lexer {
     return this.#source.charAt(this.#current++);
   }
 
+  /** conditional advance */
   #match(expected: string) {
-    if (this.#isAtEnd()) return false;
-    if (this.#source.charAt(this.#current) !== expected) return false;
+    if (this.#isAtEnd()) {
+      Interpreter.positionError(
+        this.#current,
+        "Reached end of file while looking for " + expected,
+      );
+    }
 
-    this.#current++;
-    return true;
+    if (this.#source.charAt(this.#current) === expected) {
+      this.#current++;
+    }
   }
 
   #peek(n = 0) {
@@ -34,24 +40,117 @@ export class Lexer {
     return this.#source.charAt(this.#current + n);
   }
 
-  #addSimpleToken(type: TokenType) {
-    this.#addToken(type, null);
+  #makeToken(type: TokenType, literal: unknown) {
+    const text = this.#source.substring(this.#start, this.#current);
+    return new Token(type, text, literal, this.#start);
   }
 
   #addToken(type: TokenType, literal: unknown) {
-    const text = this.#source.substring(this.#start, this.#current);
-    this.#tokens.push(new Token(type, text, literal, this.#start));
+    this.#tokens.push(this.#makeToken(type, literal));
+  }
+
+  #addSimpleToken(type: TokenType) {
+    this.#addToken(type, null);
   }
 
   #isDigit(c: string) {
     return /\d/.test(c);
   }
 
-  #number() {
-    while (this.#isDigit(this.#peek())) this.#advance();
+  #literal() {
+    const missingUnitError = () =>
+      Interpreter.positionError(this.#current, "Missing unit at duration end");
 
-    const value = Number(this.#source.substring(this.#start, this.#current));
-    this.#addToken(TokenType.NUMBER, value);
+    const tooManyPartsError = () =>
+      Interpreter.positionError(
+        this.#current,
+        "Found parts after duration end",
+      );
+
+    let offset = this.#start;
+    const number = () => {
+      while (this.#isDigit(this.#peek())) this.#advance();
+      return Number(this.#source.substring(offset, this.#current));
+    };
+
+    let literal = number();
+    let unit = this.#peek();
+
+    if (!["d", "h", "m", "s"].includes(unit)) {
+      return this.#addToken(TokenType.NUMBER, literal);
+    }
+
+    const value: Temporal.DurationLike = {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    };
+
+    const emitToken = () => {
+      this.#addToken(TokenType.DURATION, Temporal.Duration.from(value));
+    };
+
+    while (true) {
+      switch (unit) {
+        case "d": {
+          this.#advance();
+          value.days = literal;
+          if (!this.#isDigit(this.#peek())) return emitToken();
+          offset = this.#current;
+
+          literal = number();
+          const nextUnit = this.#peek();
+          if (!["h", "m", "s"].includes(nextUnit)) return missingUnitError();
+          unit = nextUnit;
+          continue;
+        }
+
+        case "h": {
+          this.#advance();
+          value.hours = literal;
+          if (!this.#isDigit(this.#peek())) return emitToken();
+          offset = this.#current;
+
+          literal = number();
+          const nextUnit = this.#peek();
+          if (!["m", "s"].includes(nextUnit)) return missingUnitError();
+          unit = nextUnit;
+          continue;
+        }
+
+        case "m": {
+          this.#advance();
+          this.#match("i");
+          this.#match("n");
+          value.minutes = literal;
+          if (!this.#isDigit(this.#peek())) return emitToken();
+          offset = this.#current;
+
+          literal = number();
+          const nextUnit = this.#peek();
+
+          if (nextUnit !== "s") return missingUnitError();
+
+          unit = nextUnit;
+          continue;
+        }
+
+        case "s": {
+          this.#advance();
+          value.seconds = literal;
+          if (this.#isDigit(this.#peek())) return tooManyPartsError();
+          return emitToken();
+        }
+
+        default:
+          Interpreter.positionError(
+            this.#current,
+            "Unexpected character during literal.",
+          );
+          return;
+      }
+    }
   }
 
   scanTokens() {
@@ -78,28 +177,7 @@ export class Lexer {
         case "/":
           this.#addSimpleToken(TokenType.SLASH);
           break;
-        case "d":
-          this.#addSimpleToken(TokenType.DAY);
-          break;
-        case "h":
-          this.#addSimpleToken(TokenType.HOUR);
-          break;
-        case "s":
-          this.#addSimpleToken(TokenType.SECOND);
-          break;
-        case "m":
-          if (!this.#match("i")) { // Try for I
-            Interpreter.positionError(this.#start, "Unexpected character.");
-            break;
-          }
 
-          if (!this.#match("n")) { // Try for N
-            Interpreter.positionError(this.#start, "Unexpected character.");
-            break;
-          }
-
-          this.#addSimpleToken(TokenType.MINUTE);
-          break;
         case " ":
         case "\r":
         case "\t":
@@ -107,7 +185,7 @@ export class Lexer {
           break;
         default:
           if (this.#isDigit(lexeme)) {
-            this.#number();
+            this.#literal();
           } else {
             Interpreter.positionError(this.#start, "Unexpected character.");
           }

@@ -7,19 +7,9 @@ export const TokenType = Object.freeze({
   STAR: "STAR",
   SLASH: "SLASH",
 
-  DAY: "DAY",
-  HOUR: "HOUR",
-  MINUTE: "MINUTE",
-  SECOND: "SECOND",
-
   NUMBER: "NUMBER",
+  DURATION: "DURATION",
   EOF: "EOF",
 });
 
 export type TokenType = typeof TokenType[keyof typeof TokenType];
-
-export type DurationType =
-  | typeof TokenType.DAY
-  | typeof TokenType.HOUR
-  | typeof TokenType.MINUTE
-  | typeof TokenType.SECOND;
