@@ -1,11 +1,16 @@
 <template>
   <textarea
-    placeholder="(50min * 2) + 30min - (4 * 50s) / 2"
+    placeholder="e.g. (50min * 2) + 30min - (4 * 50s) / 2"
     v-model="text"
-    @keypress.ctrl.enter="emit('parse', text)"
+    @keypress.ctrl.enter="emit('parse', text.replace(/\n/g, ' ').trim())"
   ></textarea>
   <div class="controls">
-    <button type="button" @click="emit('parse', text)">Calculate!</button>
+    <button
+      type="button"
+      @click="emit('parse', text.replace(/\n/g, ' ').trim())"
+    >
+      Calculate!
+    </button>
     <span>or</span>
     <div><kbd>Ctrl</kbd> + <kbd>Enter</kbd></div>
   </div>

@@ -17,22 +17,13 @@
         >
         <span class="separator">·</span>
         <a
-          href="https://github.com/peruibeloko"
-          target="_blank"
-          class="source-link"
-          >Check my other projects here!</a
+        href="https://github.com/peruibeloko"
+        target="_blank"
+        class="source-link"
+        >Check my other projects here!</a
         >
-      </div>
-      <div class="line">
-        <small
-          >Powered by the, now Stage 4,
-          <a
-            href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal"
-            target="_blank"
-            class="source-link"
-            >Temporal Object proposal</a
-          >
-        </small>
+        <span class="separator">·</span>
+        <span>Requires at least Chrome 144 or Firefox 139 (Sorry Safari!)</span>
       </div>
     </footer>
   </div>
@@ -46,6 +37,11 @@ import { Interpreter } from "./Interpreter.ts";
 const result = ref("");
 
 const handleParse = (input: string) => {
+  if (input === "") {
+    result.value = "Please enter an expression!"
+    return;
+  }
+  
   const evalResult = new Interpreter().run(input);
 
   if (typeof evalResult === "number") {
