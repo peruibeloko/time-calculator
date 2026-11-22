@@ -1,6 +1,6 @@
 # Time Calculator ⏳
 
-Little project that showcases the new TC39 proposal for a more robust date and time global object called [Temporal](https://tc39.es/proposal-temporal/docs/). Handles basic arithmetic operations as shown in the example. Uses a RegEx based lexer and shunting yard parsing to do most of the text processing, then hands it off to Temporal for all the math work.
+Little project that showcases the new robust date and time API called [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal). Handles basic arithmetic operations as shown in the example, and uses the [shunting yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm) to parse the infix notation into RPN, which is then fed into a small evaluator that leverages Temporal for all the math work.
 
 ## Project Setup 🔧
 
