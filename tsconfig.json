@@ -2,7 +2,7 @@
   "files": [],
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["ESNext"],
+    "lib": ["DOM", "ESNext"],
     "module": "ESNext",
     "skipLibCheck": true,
 
@@ -14,11 +14,8 @@
     "noEmit": true,
 
     /* Linting */
-    "strict": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUnusedParameters": true
   },
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "include": ["vite.config.mjs", "src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
